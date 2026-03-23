@@ -1,20 +1,20 @@
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <div class="brand-logo">
-      <span class="brand-icon">B</span>
+      <span class="brand-icon">R</span>
     </div>
     <div class="brand-text">
-      <span class="brand-name">Bryan's</span>
+      <span class="brand-name">Robinsons</span>
       <span class="brand-sub">Delivery Tracker</span>
     </div>
   </div>
 
   <nav class="sidebar-nav">
     <!-- Main – manager & admin only -->
-    <% if (currentUser && (currentUser.role === 'manager' || currentUser.role === 'admin')) { %>
+    <% if (typeof currentUser !== 'undefined' && currentUser && (currentUser.role === 'manager' || currentUser.role === 'admin')) { %>
     <div class="nav-section-label">Main</div>
     <ul class="nav-list">
-      <li class="nav-item <%= currentPath === '/' ? 'active' : '' %>">
+      <li class="nav-item <%= (typeof currentPath !== 'undefined' && currentPath === '/') ? 'active' : '' %>">
         <a href="/" class="nav-link">
           <i data-feather="grid"></i>
           <span>Dashboard</span>
@@ -26,22 +26,22 @@
     <!-- Operations – all roles -->
     <div class="nav-section-label">Operations</div>
     <ul class="nav-list">
-      <li class="nav-item <%= currentPath.startsWith('/deliveries') ? 'active' : '' %>">
+      <li class="nav-item <%= (typeof currentPath !== 'undefined' && currentPath && currentPath.startsWith('/deliveries')) ? 'active' : '' %>">
         <a href="/deliveries" class="nav-link">
           <i data-feather="package"></i>
           <span>Deliveries</span>
         </a>
       </li>
-      <% if (currentUser && (currentUser.role === 'manager' || currentUser.role === 'admin')) { %>
-      <li class="nav-item <%= currentPath.startsWith('/orders') ? 'active' : '' %>">
+      <% if (typeof currentUser !== 'undefined' && currentUser && (currentUser.role === 'manager' || currentUser.role === 'admin')) { %>
+      <li class="nav-item <%= (typeof currentPath !== 'undefined' && currentPath && currentPath.startsWith('/orders')) ? 'active' : '' %>">
         <a href="/orders" class="nav-link">
           <i data-feather="file-text"></i>
           <span>Purchase Orders</span>
         </a>
       </li>
       <% } %>
-      <% if (currentUser && currentUser.role === 'admin') { %>
-      <li class="nav-item <%= currentPath.startsWith('/vendors') ? 'active' : '' %>">
+      <% if (typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'admin') { %>
+      <li class="nav-item <%= (typeof currentPath !== 'undefined' && currentPath && currentPath.startsWith('/vendors')) ? 'active' : '' %>">
         <a href="/vendors" class="nav-link">
           <i data-feather="truck"></i>
           <span>Vendors</span>
@@ -59,7 +59,7 @@
           <span>Record Delivery</span>
         </a>
       </li>
-      <% if (currentUser && (currentUser.role === 'manager' || currentUser.role === 'admin')) { %>
+      <% if (typeof currentUser !== 'undefined' && currentUser && (currentUser.role === 'manager' || currentUser.role === 'admin')) { %>
       <li class="nav-item">
         <a href="/orders/new" class="nav-link nav-link-action">
           <i data-feather="clipboard"></i>
@@ -70,10 +70,10 @@
     </ul>
 
     <!-- Admin -->
-    <% if (currentUser && currentUser.role === 'admin') { %>
+    <% if (typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'admin') { %>
     <div class="nav-section-label">Admin</div>
     <ul class="nav-list">
-      <li class="nav-item <%= currentPath.startsWith('/users') ? 'active' : '' %>">
+      <li class="nav-item <%= (typeof currentPath !== 'undefined' && currentPath && currentPath.startsWith('/users')) ? 'active' : '' %>">
         <a href="/users" class="nav-link">
           <i data-feather="users"></i>
           <span>User Management</span>
@@ -84,7 +84,7 @@
   </nav>
 
   <!-- User Info + Logout -->
-  <% if (currentUser) { %>
+  <% if (typeof currentUser !== 'undefined' && currentUser) { %>
   <div class="sidebar-user">
     <div class="sidebar-user-info">
       <div class="sidebar-avatar">
@@ -102,7 +102,7 @@
   <% } %>
 
   <div class="sidebar-footer">
-    <span>&copy; <%= currentYear %> Bryan's Supermarket</span>
+    <span>&copy; <%= typeof currentYear !== 'undefined' ? currentYear : new Date().getFullYear() %> Robinsons Supermarket</span>
   </div>
 </aside>
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
