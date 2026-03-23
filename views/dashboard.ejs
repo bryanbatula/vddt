@@ -1,0 +1,145 @@
+<%- include('partials/header') %>
+
+<!-- ── Summary Cards ─────────────────────────────────── -->
+<section class="stats-grid">
+  <div class="stat-card stat-card--primary">
+    <div class="stat-icon"><i data-feather="package"></i></div>
+    <div class="stat-body">
+      <p class="stat-label">Deliveries Today</p>
+      <h2 class="stat-value"><%= stats.totalDeliveriesToday %></h2>
+    </div>
+  </div>
+
+  <div class="stat-card stat-card--danger">
+    <div class="stat-icon"><i data-feather="alert-triangle"></i></div>
+    <div class="stat-body">
+      <p class="stat-label">Discrepancies Today</p>
+      <h2 class="stat-value"><%= stats.discrepanciesToday %></h2>
+    </div>
+  </div>
+
+  <div class="stat-card stat-card--warning">
+    <div class="stat-icon"><i data-feather="trending-down"></i></div>
+    <div class="stat-body">
+      <p class="stat-label">Avg Shrinkage (Today)</p>
+      <h2 class="stat-value"><%= stats.avgShrinkage %>%</h2>
+    </div>
+  </div>
+
+  <div class="stat-card stat-card--info">
+    <div class="stat-icon"><i data-feather="file-text"></i></div>
+    <div class="stat-body">
+      <p class="stat-label">Open Orders</p>
+      <h2 class="stat-value"><%= stats.openOrders %></h2>
+    </div>
+  </div>
+
+  <div class="stat-card stat-card--success">
+    <div class="stat-icon"><i data-feather="truck"></i></div>
+    <div class="stat-body">
+      <p class="stat-label">Active Vendors</p>
+      <h2 class="stat-value"><%= stats.totalVendors %></h2>
+    </div>
+  </div>
+</section>
+
+<!-- ── Status Breakdown Pills ────────────────────────── -->
+<% if (statusBreakdown.length) { %>
+<section class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i data-feather="bar-chart-2"></i> Delivery Status Breakdown</h3>
+  </div>
+  <div class="card-body status-pills">
+    <% statusBreakdown.forEach(s => { %>
+      <div class="status-pill status-pill--<%= s.status.toLowerCase().replace(' ','-').replace('-','') %>">
+        <span class="pill-label"><%= s.status %></span>
+        <span class="pill-count"><%= s.count %></span>
+      </div>
+    <% }) %>
+  </div>
+</section>
+<% } %>
+
+<!-- ── Recent Deliveries Table ───────────────────────── -->
+<section class="card mt-4">
+  <div class="card-header">
+    <h3 class="card-title"><i data-feather="list"></i> Recent Deliveries</h3>
+    <div class="card-actions">
+      <a href="/deliveries/new" class="btn btn-primary btn-sm">
+        <i data-feather="plus"></i> Record Delivery
+      </a>
+      <a href="/deliveries" class="btn btn-outline btn-sm">View All</a>
+    </div>
+  </div>
+
+  <% if (recentDeliveries.length === 0) { %>
+    <div class="empty-state">
+      <i data-feather="inbox"></i>
+      <p>No deliveries recorded yet.</p>
+      <a href="/deliveries/new" class="btn btn-primary">Record First Delivery</a>
+    </div>
+  <% } else { %>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>PO Number</th>
+          <th>Vendor</th>
+          <th>Product</th>
+          <th>SKU</th>
+          <th class="text-center">Expected</th>
+          <th class="text-center">Actual</th>
+          <th class="text-center">Variance</th>
+          <th class="text-center">Shrinkage %</th>
+          <th class="text-center">Status</th>
+          <th>Received By</th>
+          <th>Date</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% recentDeliveries.forEach(d => { %>
+          <tr class="
+            <%= d.status === 'Discrepancy' ? 'row-discrepancy' : '' %>
+            <%= d.status === 'Damaged'     ? 'row-damaged'     : '' %>
+            <%= d.status === 'Over-Delivery' ? 'row-over'      : '' %>
+          ">
+            <td class="text-muted text-sm"><%= d.id %></td>
+            <td>
+              <a href="/orders/<%= d.po_id %>" class="link-subtle"><%= d.po_number %></a>
+            </td>
+            <td><%= d.vendor_name %></td>
+            <td class="font-medium"><%= d.product_name %></td>
+            <td class="text-muted text-sm"><%= d.sku || '—' %></td>
+            <td class="text-center"><%= d.expected_quantity %></td>
+            <td class="text-center"><%= d.actual_quantity %></td>
+            <td class="text-center <%= d.quantity_variance < 0 ? 'text-danger' : d.quantity_variance > 0 ? 'text-over' : 'text-success' %>">
+              <%= d.quantity_variance > 0 ? '+' : '' %><%= d.quantity_variance %>
+            </td>
+            <td class="text-center <%= parseFloat(d.shrinkage_percentage) > 0 ? 'text-danger' : 'text-success' %>">
+              <%= parseFloat(d.shrinkage_percentage).toFixed(2) %>%
+            </td>
+            <td class="text-center">
+              <span class="badge badge--<%= d.status.toLowerCase().replace(' ','-').replace('-','') %>">
+                <%= d.status %>
+              </span>
+            </td>
+            <td class="text-sm"><%= d.received_by || '—' %></td>
+            <td class="text-sm text-muted">
+              <%= new Date(d.received_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+            </td>
+            <td>
+              <a href="/deliveries/<%= d.id %>" class="btn btn-icon" title="View">
+                <i data-feather="eye"></i>
+              </a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>

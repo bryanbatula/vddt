@@ -1,0 +1,112 @@
+<%- include('../partials/header') %>
+
+<nav class="breadcrumb">
+  <a href="/">Dashboard</a>
+  <i data-feather="chevron-right"></i>
+  <a href="/orders">Purchase Orders</a>
+  <i data-feather="chevron-right"></i>
+  <span><%= order ? 'Edit PO' : 'New PO' %></span>
+</nav>
+
+<% if (errors && errors.length) { %>
+  <div class="alert alert--danger">
+    <i data-feather="alert-circle"></i>
+    <ul class="alert-list">
+      <% errors.forEach(e => { %><li><%= e %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<section class="card" style="max-width: 720px;">
+  <div class="card-header">
+    <h3 class="card-title">
+      <i data-feather="<%= order ? 'edit-2' : 'plus-circle' %>"></i>
+      <%= order ? 'Edit Purchase Order' : 'New Purchase Order' %>
+    </h3>
+  </div>
+  <div class="card-body">
+    <form
+      method="POST"
+      action="<%= order ? '/orders/' + order.id + '?_method=PUT' : '/orders' %>"
+      class="form-grid"
+    >
+      <div class="form-group form-group--full">
+        <label class="form-label required" for="vendor_id">Vendor</label>
+        <select name="vendor_id" id="vendor_id" class="form-control" required>
+          <option value="">-- Select Vendor --</option>
+          <% vendors.forEach(v => { %>
+            <option value="<%= v.id %>" <%= order && order.vendor_id == v.id ? 'selected' : '' %>><%= v.name %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="po_number">PO Number</label>
+        <input
+          type="text" id="po_number" name="po_number"
+          class="form-control"
+          placeholder="e.g. PO-2026-00010"
+          value="<%= order ? order.po_number : '' %>"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="order_date">Order Date</label>
+        <input
+          type="date" id="order_date" name="order_date"
+          class="form-control"
+          value="<%= order ? (order.order_date ? order.order_date.toString().slice(0,10) : '') : new Date().toISOString().slice(0,10) %>"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="expected_delivery_date">Expected Delivery Date</label>
+        <input
+          type="date" id="expected_delivery_date" name="expected_delivery_date"
+          class="form-control"
+          value="<%= order && order.expected_delivery_date ? order.expected_delivery_date.toString().slice(0,10) : '' %>"
+        />
+      </div>
+
+      <% if (order) { %>
+      <div class="form-group">
+        <label class="form-label" for="status">Status</label>
+        <select name="status" id="status" class="form-control">
+          <% ['Pending','Partially Received','Fully Received','Cancelled'].forEach(s => { %>
+            <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s %></option>
+          <% }) %>
+        </select>
+      </div>
+      <% } %>
+
+      <div class="form-group">
+        <label class="form-label" for="created_by">Created By</label>
+        <input
+          type="text" id="created_by" name="created_by"
+          class="form-control"
+          placeholder="Your name"
+          value="<%= order ? order.created_by || '' : '' %>"
+        />
+      </div>
+
+      <div class="form-group form-group--full">
+        <label class="form-label" for="notes">Notes</label>
+        <textarea id="notes" name="notes" class="form-control" rows="3"
+          placeholder="Any notes about this purchase order..."
+        ><%= order ? order.notes || '' : '' %></textarea>
+      </div>
+
+      <div class="form-actions form-group--full">
+        <a href="/orders" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+          <i data-feather="save"></i>
+          <%= order ? 'Update PO' : 'Create PO' %>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

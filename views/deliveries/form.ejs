@@ -1,0 +1,230 @@
+<%- include('../partials/header') %>
+
+<div class="form-page">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a href="/">Dashboard</a>
+    <i data-feather="chevron-right"></i>
+    <a href="/deliveries">Deliveries</a>
+    <i data-feather="chevron-right"></i>
+    <span><%= delivery ? 'Edit Delivery' : 'Record Delivery' %></span>
+  </nav>
+
+  <% if (errors && errors.length) { %>
+    <div class="alert alert--danger">
+      <i data-feather="alert-circle"></i>
+      <ul class="alert-list">
+        <% errors.forEach(e => { %><li><%= e %></li><% }) %>
+      </ul>
+    </div>
+  <% } %>
+
+  <section class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i data-feather="<%= delivery ? 'edit-2' : 'plus-circle' %>"></i>
+        <%= delivery ? 'Edit Delivery Record' : 'Record New Delivery' %>
+      </h3>
+    </div>
+    <div class="card-body">
+      <form
+        method="POST"
+        action="<%= delivery ? '/deliveries/' + delivery.id + '?_method=PUT' : '/deliveries' %>"
+        class="form-grid"
+        id="deliveryForm"
+      >
+        <!-- Purchase Order -->
+        <div class="form-group form-group--full">
+          <label class="form-label required" for="po_id">Purchase Order</label>
+          <select name="po_id" id="po_id" class="form-control" required>
+            <option value="">-- Select Purchase Order --</option>
+            <% orders.forEach(o => { %>
+              <option value="<%= o.id %>"
+                <%= (delivery ? delivery.po_id == o.id : preselectedPoId == o.id) ? 'selected' : '' %>>
+                <%= o.po_number %> — <%= o.vendor_name %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Product Name -->
+        <div class="form-group">
+          <label class="form-label required" for="product_name">Product Name</label>
+          <input
+            type="text" id="product_name" name="product_name"
+            class="form-control"
+            placeholder="e.g. Milo 1kg"
+            value="<%= delivery ? delivery.product_name : '' %>"
+            required
+          />
+        </div>
+
+        <!-- SKU -->
+        <div class="form-group">
+          <label class="form-label" for="sku">SKU / Barcode</label>
+          <input
+            type="text" id="sku" name="sku"
+            class="form-control"
+            placeholder="e.g. NES-MILO-1KG"
+            value="<%= delivery ? delivery.sku || '' : '' %>"
+          />
+        </div>
+
+        <!-- Unit -->
+        <div class="form-group">
+          <label class="form-label" for="unit">Unit of Measure</label>
+          <select name="unit" id="unit" class="form-control">
+            <% ['pcs','box','case','bag','pack','kg','liter','bottle','carton'].forEach(u => { %>
+              <option value="<%= u %>" <%= (delivery ? delivery.unit : 'pcs') === u ? 'selected' : '' %>>
+                <%= u %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Unit Price -->
+        <div class="form-group">
+          <label class="form-label" for="unit_price">Unit Price (₱)</label>
+          <input
+            type="number" id="unit_price" name="unit_price"
+            class="form-control" min="0" step="0.01"
+            placeholder="0.00"
+            value="<%= delivery ? delivery.unit_price || '' : '' %>"
+          />
+        </div>
+
+        <!-- Quantity Section -->
+        <div class="form-section-divider"><span>Quantity Details</span></div>
+
+        <!-- Expected Quantity -->
+        <div class="form-group">
+          <label class="form-label required" for="expected_quantity">
+            Expected Quantity
+            <span class="form-hint">From Purchase Order</span>
+          </label>
+          <input
+            type="number" id="expected_quantity" name="expected_quantity"
+            class="form-control qty-input" min="0"
+            placeholder="0"
+            value="<%= delivery ? delivery.expected_quantity : '' %>"
+            required
+          />
+        </div>
+
+        <!-- Actual Quantity -->
+        <div class="form-group">
+          <label class="form-label required" for="actual_quantity">
+            Actual Quantity Received
+            <span class="form-hint">Count physically received</span>
+          </label>
+          <input
+            type="number" id="actual_quantity" name="actual_quantity"
+            class="form-control qty-input" min="0"
+            placeholder="0"
+            value="<%= delivery ? delivery.actual_quantity : '' %>"
+            required
+          />
+        </div>
+
+        <!-- Damaged Quantity -->
+        <div class="form-group">
+          <label class="form-label" for="damaged_quantity">
+            Damaged Quantity
+            <span class="form-hint">Items damaged on arrival</span>
+          </label>
+          <input
+            type="number" id="damaged_quantity" name="damaged_quantity"
+            class="form-control qty-input" min="0"
+            placeholder="0"
+            value="<%= delivery ? delivery.damaged_quantity : '0' %>"
+          />
+        </div>
+
+        <!-- Live Preview -->
+        <div class="form-group form-group--full">
+          <div class="qty-preview" id="qtyPreview">
+            <div class="qty-preview-item">
+              <span class="qty-preview-label">Variance</span>
+              <span class="qty-preview-value" id="previewVariance">—</span>
+            </div>
+            <div class="qty-preview-item">
+              <span class="qty-preview-label">Shrinkage %</span>
+              <span class="qty-preview-value" id="previewShrinkage">—</span>
+            </div>
+            <div class="qty-preview-item">
+              <span class="qty-preview-label">Estimated Status</span>
+              <span class="qty-preview-value" id="previewStatus">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group form-group--full">
+          <label class="form-label" for="notes">Notes / Remarks</label>
+          <textarea
+            id="notes" name="notes" rows="3"
+            class="form-control"
+            placeholder="Any additional notes about this delivery..."
+          ><%= delivery ? delivery.notes || '' : '' %></textarea>
+        </div>
+
+        <!-- Received By -->
+        <div class="form-group">
+          <label class="form-label" for="received_by">Received By</label>
+          <input
+            type="text" id="received_by" name="received_by"
+            class="form-control"
+            placeholder="Warehouse receiver's name"
+            value="<%= delivery ? delivery.received_by || '' : '' %>"
+          />
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions form-group--full">
+          <a href="/deliveries" class="btn btn-outline">Cancel</a>
+          <button type="submit" class="btn btn-primary">
+            <i data-feather="save"></i>
+            <%= delivery ? 'Update Delivery' : 'Save Delivery' %>
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>
+
+<script>
+  // Live quantity preview calculator
+  const expInput = document.getElementById('expected_quantity');
+  const actInput = document.getElementById('actual_quantity');
+  const dmgInput = document.getElementById('damaged_quantity');
+  const varEl    = document.getElementById('previewVariance');
+  const shrEl    = document.getElementById('previewShrinkage');
+  const staEl    = document.getElementById('previewStatus');
+
+  function calcPreview() {
+    const exp = parseInt(expInput.value, 10) || 0;
+    const act = parseInt(actInput.value, 10) || 0;
+    const dmg = parseInt(dmgInput.value, 10) || 0;
+
+    const variance   = act - exp;
+    const shrinkage  = exp > 0 ? (((exp - act) / exp) * 100).toFixed(2) : 0;
+
+    let status = 'Matched';
+    let statusClass = 'status-matched';
+    if (dmg > 0)      { status = 'Damaged';       statusClass = 'status-damaged'; }
+    else if (act > exp){ status = 'Over-Delivery'; statusClass = 'status-overdelivery'; }
+    else if (act < exp){ status = 'Discrepancy';   statusClass = 'status-discrepancy'; }
+
+    varEl.textContent = (variance >= 0 ? '+' : '') + variance;
+    varEl.className   = 'qty-preview-value ' + (variance < 0 ? 'text-danger' : variance > 0 ? 'text-over' : 'text-success');
+    shrEl.textContent = shrinkage + '%';
+    shrEl.className   = 'qty-preview-value ' + (shrinkage > 0 ? 'text-danger' : 'text-success');
+    staEl.textContent = status;
+    staEl.className   = 'qty-preview-value badge badge--' + status.toLowerCase().replace(/[\s-]/g,'');
+  }
+
+  [expInput, actInput, dmgInput].forEach(el => el.addEventListener('input', calcPreview));
+  calcPreview();
+</script>
+
+<%- include('../partials/footer') %>

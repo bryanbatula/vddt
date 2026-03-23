@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In | VDDT – Robinsons Supermarket</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/feather-icons"></script>
+  <style>
+    body { background: linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+
+    .login-wrapper { width: 100%; max-width: 420px; }
+
+    .login-brand { text-align: center; margin-bottom: 32px; }
+    .login-brand-logo { width: 64px; height: 64px; background: white; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .login-brand-icon { font-size: 2rem; font-weight: 800; color: #16a34a; line-height: 1; }
+    .login-brand-name { display: block; font-size: 1.4rem; font-weight: 700; color: white; line-height: 1.2; }
+    .login-brand-sub  { display: block; font-size: 0.8rem; color: rgba(255,255,255,0.65); margin-top: 4px; letter-spacing: 0.3px; }
+
+    .login-card { background: white; border-radius: 20px; padding: 36px 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+
+    .login-title { font-size: 1.2rem; font-weight: 700; color: #111827; margin-bottom: 4px; }
+    .login-subtitle { font-size: 0.85rem; color: #6b7280; margin-bottom: 28px; }
+
+    .login-form .form-group { margin-bottom: 18px; }
+    .login-form .form-label { font-size: 0.82rem; font-weight: 600; color: #374151; display: block; margin-bottom: 6px; }
+
+    .input-icon-wrap { position: relative; }
+    .input-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none; }
+    .input-icon svg { width: 16px; height: 16px; }
+    .login-form .form-control { padding-left: 38px; }
+    .login-form .form-control:focus { border-color: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,0.12); }
+
+    .btn-login { width: 100%; padding: 11px; font-size: 0.95rem; font-weight: 600; justify-content: center; margin-top: 8px; border-radius: 10px; }
+
+    .login-error { display: flex; align-items: center; gap: 8px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 10px 14px; border-radius: 10px; font-size: 0.84rem; margin-bottom: 20px; }
+    .login-error svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    .role-pills { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; padding-top: 20px; border-top: 1px solid #f3f4f6; }
+    .role-pill-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #9ca3af; margin-bottom: 2px; }
+    .role-pill-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .role-pill { display: flex; align-items: center; gap: 6px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 6px 10px; font-size: 0.76rem; cursor: pointer; transition: all 0.15s ease; flex: 1; min-width: 100px; }
+    .role-pill:hover { border-color: #16a34a; background: #f0fdf4; }
+    .role-pill-name { font-weight: 600; color: #374151; }
+    .role-pill-cred { color: #9ca3af; font-size: 0.7rem; }
+    .role-badge { padding: 2px 8px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; }
+    .role-badge--admin    { background: #fee2e2; color: #991b1b; }
+    .role-badge--manager  { background: #dcfce7; color: #166534; }
+    .role-badge--receiver { background: #eff6ff; color: #1e40af; }
+
+    .login-footer { text-align: center; margin-top: 20px; font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+  </style>
+</head>
+<body>
+  <div class="login-wrapper">
+
+    <!-- Brand -->
+    <div class="login-brand">
+      <div class="login-brand-logo">
+        <span class="login-brand-icon">B</span>
+      </div>
+      <span class="login-brand-name">Bryan's Supermarket</span>
+      <span class="login-brand-sub">Vendor Delivery & Discrepancy Tracker</span>
+    </div>
+
+    <!-- Card -->
+    <div class="login-card">
+      <h2 class="login-title">Sign in to your account</h2>
+      <p class="login-subtitle">Enter your credentials to continue</p>
+
+      <!-- Error Alert -->
+      <% if (errors && errors.length) { %>
+        <% errors.forEach(e => { %>
+          <div class="login-error">
+            <i data-feather="alert-circle"></i>
+            <span><%= e %></span>
+          </div>
+        <% }) %>
+      <% } %>
+
+      <!-- Form -->
+      <form method="POST" action="/auth/login" class="login-form">
+        <div class="form-group">
+          <label class="form-label" for="username">Username</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon"><i data-feather="user"></i></span>
+            <input
+              type="text" id="username" name="username"
+              class="form-control"
+              placeholder="Enter your username"
+              autocomplete="username"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon"><i data-feather="lock"></i></span>
+            <input
+              type="password" id="password" name="password"
+              class="form-control"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-login">
+          <i data-feather="log-in"></i> Sign In
+        </button>
+      </form>
+
+      <!-- Demo Credentials -->
+      <div class="role-pills">
+        <p class="role-pill-label">Demo Accounts – click to fill</p>
+        <div class="role-pill-row">
+          <div class="role-pill" onclick="fillCreds('admin','admin123')">
+            <span class="role-badge role-badge--admin">Admin</span>
+            <div>
+              <div class="role-pill-name">admin</div>
+              <div class="role-pill-cred">admin123</div>
+            </div>
+          </div>
+          <div class="role-pill" onclick="fillCreds('manager','manager123')">
+            <span class="role-badge role-badge--manager">Manager</span>
+            <div>
+              <div class="role-pill-name">manager</div>
+              <div class="role-pill-cred">manager123</div>
+            </div>
+          </div>
+          <div class="role-pill" onclick="fillCreds('receiver','receiver123')">
+            <span class="role-badge role-badge--receiver">Receiver</span>
+            <div>
+              <div class="role-pill-name">receiver</div>
+              <div class="role-pill-cred">receiver123</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="login-footer">&copy; <%= new Date().getFullYear() %> Robinsons Supermarket &mdash; Internal Use Only</p>
+  </div>
+
+  <script>
+    feather.replace();
+    function fillCreds(username, password) {
+      document.getElementById('username').value = username;
+      document.getElementById('password').value = password;
+      document.getElementById('password').closest('form').querySelector('.btn-login').focus();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<%- include('../partials/header') %>
+
+<nav class="breadcrumb">
+  <a href="/">Dashboard</a>
+  <i data-feather="chevron-right"></i>
+  <a href="/vendors">Vendors</a>
+  <i data-feather="chevron-right"></i>
+  <span><%= vendor ? 'Edit Vendor' : 'Add Vendor' %></span>
+</nav>
+
+<% if (errors && errors.length) { %>
+  <div class="alert alert--danger">
+    <i data-feather="alert-circle"></i>
+    <ul class="alert-list">
+      <% errors.forEach(e => { %><li><%= e %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<section class="card" style="max-width: 680px;">
+  <div class="card-header">
+    <h3 class="card-title">
+      <i data-feather="<%= vendor ? 'edit-2' : 'plus-circle' %>"></i>
+      <%= vendor ? 'Edit Vendor' : 'Add New Vendor' %>
+    </h3>
+  </div>
+  <div class="card-body">
+    <form
+      method="POST"
+      action="<%= vendor ? '/vendors/' + vendor.id + '?_method=PUT' : '/vendors' %>"
+      class="form-grid"
+    >
+      <div class="form-group form-group--full">
+        <label class="form-label required" for="name">Vendor / Company Name</label>
+        <input
+          type="text" id="name" name="name"
+          class="form-control"
+          placeholder="e.g. Nestlé Philippines"
+          value="<%= vendor ? vendor.name : '' %>"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="contact_person">Contact Person</label>
+        <input
+          type="text" id="contact_person" name="contact_person"
+          class="form-control"
+          placeholder="e.g. Juan dela Cruz"
+          value="<%= vendor ? vendor.contact_person || '' : '' %>"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <input
+          type="email" id="email" name="email"
+          class="form-control"
+          placeholder="contact@vendor.com"
+          value="<%= vendor ? vendor.email || '' : '' %>"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="phone">Phone Number</label>
+        <input
+          type="tel" id="phone" name="phone"
+          class="form-control"
+          placeholder="09XX XXX XXXX"
+          value="<%= vendor ? vendor.phone || '' : '' %>"
+        />
+      </div>
+
+      <% if (vendor) { %>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <label class="toggle-label">
+          <input type="checkbox" name="is_active" <%= vendor.is_active ? 'checked' : '' %> />
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">Active</span>
+        </label>
+      </div>
+      <% } %>
+
+      <div class="form-group form-group--full">
+        <label class="form-label" for="address">Business Address</label>
+        <textarea
+          id="address" name="address"
+          class="form-control" rows="3"
+          placeholder="Street, City, Province"
+        ><%= vendor ? vendor.address || '' : '' %></textarea>
+      </div>
+
+      <div class="form-actions form-group--full">
+        <a href="/vendors" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+          <i data-feather="save"></i>
+          <%= vendor ? 'Update Vendor' : 'Save Vendor' %>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

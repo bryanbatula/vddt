@@ -1,0 +1,93 @@
+<%- include('../partials/header') %>
+
+<nav class="breadcrumb">
+  <a href="/">Dashboard</a>
+  <i data-feather="chevron-right"></i>
+  <a href="/vendors">Vendors</a>
+  <i data-feather="chevron-right"></i>
+  <span><%= vendor.name %></span>
+</nav>
+
+<div class="detail-header">
+  <div>
+    <h2 class="detail-title"><%= vendor.name %></h2>
+    <p class="detail-sub">
+      <span class="badge <%= vendor.is_active ? 'badge--matched' : 'badge--discrepancy' %>">
+        <%= vendor.is_active ? 'Active' : 'Inactive' %>
+      </span>
+    </p>
+  </div>
+  <div class="detail-actions">
+    <a href="/vendors/<%= vendor.id %>/edit" class="btn btn-outline">
+      <i data-feather="edit-2"></i> Edit
+    </a>
+    <a href="/orders/new" class="btn btn-primary">
+      <i data-feather="plus"></i> New PO
+    </a>
+  </div>
+</div>
+
+<div class="detail-grid">
+  <section class="card">
+    <div class="card-header"><h3 class="card-title">Contact Information</h3></div>
+    <div class="card-body detail-list">
+      <div class="detail-row"><span>Contact Person</span><strong><%= vendor.contact_person || '—' %></strong></div>
+      <div class="detail-row"><span>Email</span><strong><%= vendor.email || '—' %></strong></div>
+      <div class="detail-row"><span>Phone</span><strong><%= vendor.phone || '—' %></strong></div>
+      <div class="detail-row"><span>Address</span><strong><%= vendor.address || '—' %></strong></div>
+      <div class="detail-row">
+        <span>Added</span>
+        <strong><%= new Date(vendor.created_at).toLocaleDateString('en-PH', { dateStyle:'long' }) %></strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-header">
+      <h3 class="card-title">Purchase Orders (<%= orders.length %>)</h3>
+      <a href="/orders/new" class="btn btn-sm btn-primary">
+        <i data-feather="plus"></i> New PO
+      </a>
+    </div>
+    <% if (orders.length === 0) { %>
+      <div class="empty-state" style="padding:2rem">
+        <p>No purchase orders for this vendor yet.</p>
+      </div>
+    <% } else { %>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>PO Number</th>
+            <th>Order Date</th>
+            <th>Expected Delivery</th>
+            <th class="text-center">Lines</th>
+            <th class="text-center">Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% orders.forEach(o => { %>
+            <tr>
+              <td class="font-medium"><%= o.po_number %></td>
+              <td class="text-sm"><%= new Date(o.order_date).toLocaleDateString('en-PH') %></td>
+              <td class="text-sm"><%= o.expected_delivery_date ? new Date(o.expected_delivery_date).toLocaleDateString('en-PH') : '—' %></td>
+              <td class="text-center"><%= o.delivery_count %></td>
+              <td class="text-center">
+                <span class="badge badge--<%= o.status.toLowerCase().replace(/[\s]/g,'') %>">
+                  <%= o.status %>
+                </span>
+              </td>
+              <td>
+                <a href="/orders/<%= o.id %>" class="btn btn-icon" title="View"><i data-feather="eye"></i></a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </section>
+</div>
+
+<%- include('../partials/footer') %>

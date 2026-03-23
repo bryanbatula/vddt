@@ -1,0 +1,57 @@
+# ============================================================
+# Docker Compose – Local Development
+# Runs the app + PostgreSQL together in containers.
+# Usage: docker-compose up
+# ============================================================
+
+version: '3.9'
+
+services:
+
+  # ── PostgreSQL Database ──────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: vddt_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       vddt_db
+      POSTGRES_USER:     postgres
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./db/migration_add_users.sql:/docker-entrypoint-initdb.d/02_users.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Node.js App ──────────────────────────────────────────
+  app:
+    build: .
+    container_name: vddt_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV:       development
+      PORT:           3000
+      DB_HOST:        db
+      DB_PORT:        5432
+      DB_NAME:        vddt_db
+      DB_USER:        postgres
+      DB_PASSWORD:    "1234"
+      SESSION_SECRET: local-docker-dev-secret-change-me
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Hot-reload: sync code changes without rebuilding
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:

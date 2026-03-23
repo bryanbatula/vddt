@@ -1,0 +1,131 @@
+<%- include('../partials/header') %>
+
+<!-- ── Filters ──────────────────────────────────────── -->
+<section class="card mb-4">
+  <div class="card-header">
+    <h3 class="card-title"><i data-feather="filter"></i> Filter Deliveries</h3>
+    <a href="/deliveries" class="btn btn-outline btn-sm">Clear Filters</a>
+  </div>
+  <div class="card-body">
+    <form method="GET" action="/deliveries" class="filter-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-control">
+            <option value="">All Statuses</option>
+            <% ['Matched','Discrepancy','Damaged','Over-Delivery'].forEach(s => { %>
+              <option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= s %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vendor</label>
+          <select name="vendor_id" class="form-control">
+            <option value="">All Vendors</option>
+            <% vendors.forEach(v => { %>
+              <option value="<%= v.id %>" <%= filters.vendor_id == v.id ? 'selected' : '' %>><%= v.name %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">From Date</label>
+          <input type="date" name="date_from" class="form-control" value="<%= filters.date_from || '' %>" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">To Date</label>
+          <input type="date" name="date_to" class="form-control" value="<%= filters.date_to || '' %>" />
+        </div>
+        <div class="form-group form-group--action">
+          <button type="submit" class="btn btn-primary">Apply</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ── Table ─────────────────────────────────────────── -->
+<section class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i data-feather="package"></i> Deliveries (<%= deliveries.length %>)</h3>
+    <a href="/deliveries/new" class="btn btn-primary btn-sm">
+      <i data-feather="plus"></i> Record Delivery
+    </a>
+  </div>
+
+  <% if (deliveries.length === 0) { %>
+    <div class="empty-state">
+      <i data-feather="inbox"></i>
+      <p>No deliveries found for the selected filters.</p>
+    </div>
+  <% } else { %>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>PO Number</th>
+          <th>Vendor</th>
+          <th>Product</th>
+          <th>SKU</th>
+          <th class="text-center">Expected</th>
+          <th class="text-center">Actual</th>
+          <th class="text-center">Damaged</th>
+          <th class="text-center">Variance</th>
+          <th class="text-center">Shrinkage %</th>
+          <th class="text-center">Status</th>
+          <th>Received By</th>
+          <th>Date</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% deliveries.forEach(d => { %>
+          <tr class="
+            <%= d.status === 'Discrepancy'   ? 'row-discrepancy' : '' %>
+            <%= d.status === 'Damaged'       ? 'row-damaged'     : '' %>
+            <%= d.status === 'Over-Delivery' ? 'row-over'        : '' %>
+          ">
+            <td class="text-muted text-sm"><%= d.id %></td>
+            <td><a href="/orders/<%= d.po_id %>" class="link-subtle"><%= d.po_number %></a></td>
+            <td><%= d.vendor_name %></td>
+            <td class="font-medium"><%= d.product_name %></td>
+            <td class="text-sm text-muted"><%= d.sku || '—' %></td>
+            <td class="text-center"><%= d.expected_quantity %></td>
+            <td class="text-center"><%= d.actual_quantity %></td>
+            <td class="text-center <%= d.damaged_quantity > 0 ? 'text-danger' : '' %>"><%= d.damaged_quantity %></td>
+            <td class="text-center <%= d.quantity_variance < 0 ? 'text-danger' : d.quantity_variance > 0 ? 'text-over' : '' %>">
+              <%= d.quantity_variance > 0 ? '+' : '' %><%= d.quantity_variance %>
+            </td>
+            <td class="text-center <%= parseFloat(d.shrinkage_percentage) > 0 ? 'text-danger' : '' %>">
+              <%= parseFloat(d.shrinkage_percentage).toFixed(2) %>%
+            </td>
+            <td class="text-center">
+              <span class="badge badge--<%= d.status.toLowerCase().replace(/[\s-]/g,'') %>">
+                <%= d.status %>
+              </span>
+            </td>
+            <td class="text-sm"><%= d.received_by || '—' %></td>
+            <td class="text-sm text-muted">
+              <%= new Date(d.received_at).toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric' }) %>
+            </td>
+            <td class="text-center">
+              <div class="btn-group">
+                <a href="/deliveries/<%= d.id %>" class="btn btn-icon" title="View"><i data-feather="eye"></i></a>
+                <a href="/deliveries/<%= d.id %>/edit" class="btn btn-icon" title="Edit"><i data-feather="edit-2"></i></a>
+                <form action="/deliveries/<%= d.id %>?_method=DELETE" method="POST" style="display:inline"
+                      onsubmit="return confirm('Delete this delivery record?')">
+                  <button type="submit" class="btn btn-icon btn-icon--danger" title="Delete">
+                    <i data-feather="trash-2"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

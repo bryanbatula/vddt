@@ -1,0 +1,68 @@
+<%- include('../partials/header') %>
+
+<section class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i data-feather="truck"></i> Vendors (<%= vendors.length %>)</h3>
+    <a href="/vendors/new" class="btn btn-primary btn-sm">
+      <i data-feather="plus"></i> Add Vendor
+    </a>
+  </div>
+
+  <% if (vendors.length === 0) { %>
+    <div class="empty-state">
+      <i data-feather="truck"></i>
+      <p>No vendors found. Add your first vendor to get started.</p>
+      <a href="/vendors/new" class="btn btn-primary">Add Vendor</a>
+    </div>
+  <% } else { %>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Vendor Name</th>
+          <th>Contact Person</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th class="text-center">Total POs</th>
+          <th class="text-center">Status</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% vendors.forEach(v => { %>
+          <tr>
+            <td class="text-muted text-sm"><%= v.id %></td>
+            <td class="font-medium">
+              <a href="/vendors/<%= v.id %>" class="link-primary"><%= v.name %></a>
+            </td>
+            <td><%= v.contact_person || '—' %></td>
+            <td class="text-sm"><%= v.email || '—' %></td>
+            <td class="text-sm"><%= v.phone || '—' %></td>
+            <td class="text-center"><%= v.total_orders %></td>
+            <td class="text-center">
+              <span class="badge <%= v.is_active ? 'badge--matched' : 'badge--discrepancy' %>">
+                <%= v.is_active ? 'Active' : 'Inactive' %>
+              </span>
+            </td>
+            <td class="text-center">
+              <div class="btn-group">
+                <a href="/vendors/<%= v.id %>" class="btn btn-icon" title="View"><i data-feather="eye"></i></a>
+                <a href="/vendors/<%= v.id %>/edit" class="btn btn-icon" title="Edit"><i data-feather="edit-2"></i></a>
+                <form action="/vendors/<%= v.id %>?_method=DELETE" method="POST" style="display:inline"
+                      onsubmit="return confirm('Delete vendor <%= v.name %>? This will also delete related POs and deliveries.')">
+                  <button type="submit" class="btn btn-icon btn-icon--danger" title="Delete">
+                    <i data-feather="trash-2"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

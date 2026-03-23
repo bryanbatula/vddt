@@ -1,0 +1,116 @@
+<%- include('../partials/header') %>
+
+<nav class="breadcrumb">
+  <a href="/">Dashboard</a>
+  <i data-feather="chevron-right"></i>
+  <a href="/users">Users</a>
+  <i data-feather="chevron-right"></i>
+  <span><%= user ? 'Edit User' : 'Add User' %></span>
+</nav>
+
+<% if (errors && errors.length) { %>
+  <div class="alert alert--danger">
+    <i data-feather="alert-circle"></i>
+    <ul class="alert-list">
+      <% errors.forEach(e => { %><li><%= e %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<section class="card" style="max-width:560px">
+  <div class="card-header">
+    <h3 class="card-title">
+      <i data-feather="<%= user ? 'edit-2' : 'user-plus' %>"></i>
+      <%= user ? 'Edit User' : 'Add New User' %>
+    </h3>
+  </div>
+  <div class="card-body">
+    <form
+      method="POST"
+      action="<%= user ? '/users/' + user.id + '?_method=PUT' : '/users' %>"
+      class="form-grid"
+    >
+      <div class="form-group form-group--full">
+        <label class="form-label required" for="full_name">Full Name</label>
+        <input type="text" id="full_name" name="full_name" class="form-control"
+          placeholder="e.g. Juan dela Cruz"
+          value="<%= user ? user.full_name : '' %>" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="username">Username</label>
+        <input type="text" id="username" name="username" class="form-control"
+          placeholder="e.g. jdelacruz"
+          value="<%= user ? user.username : '' %>" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label <%= user ? '' : 'required' %>" for="password">
+          Password
+          <% if (user) { %><span class="form-hint">Leave blank to keep current</span><% } %>
+        </label>
+        <input type="password" id="password" name="password" class="form-control"
+          placeholder="<%= user ? 'New password (optional)' : 'Min. 6 characters' %>"
+          <%= user ? '' : 'required' %> />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required" for="role">Role</label>
+        <select id="role" name="role" class="form-control" required>
+          <option value="">-- Select Role --</option>
+          <% ['receiver','manager','admin'].forEach(r => { %>
+            <option value="<%= r %>" <%= user && user.role === r ? 'selected' : '' %>><%= r.charAt(0).toUpperCase() + r.slice(1) %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <% if (user) { %>
+      <div class="form-group form-group--full">
+        <label class="form-label">Account Status</label>
+        <label class="toggle-label">
+          <input type="checkbox" name="is_active" <%= user.is_active ? 'checked' : '' %> />
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">Active</span>
+        </label>
+      </div>
+      <% } %>
+
+      <!-- Role descriptions -->
+      <div class="form-group form-group--full">
+        <div class="role-desc-grid">
+          <div class="role-desc">
+            <span class="badge badge--receiver">Receiver</span>
+            <p>Can record and view deliveries only. Redirected to delivery form on login.</p>
+          </div>
+          <div class="role-desc">
+            <span class="badge badge--manager">Manager</span>
+            <p>Full access to dashboard, deliveries, and purchase orders. Cannot manage vendors or users.</p>
+          </div>
+          <div class="role-desc">
+            <span class="badge badge--admin">Admin</span>
+            <p>Full access to everything including vendor management and user management.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions form-group--full">
+        <a href="/users" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+          <i data-feather="save"></i>
+          <%= user ? 'Update User' : 'Create User' %>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<style>
+  .role-desc-grid { display:flex; flex-wrap:wrap; gap:10px; }
+  .role-desc { flex:1; min-width:150px; background:var(--gray-50); border:1px solid var(--gray-200); border-radius:var(--radius); padding:10px 12px; }
+  .role-desc p { font-size:0.76rem; color:var(--gray-500); margin-top:6px; line-height:1.4; }
+  .badge--receiver { background:#eff6ff; color:#1e40af; }
+  .badge--manager  { background:#dcfce7; color:#166534; }
+  .badge--admin    { background:#fee2e2; color:#991b1b; }
+</style>
+
+<%- include('../partials/footer') %>

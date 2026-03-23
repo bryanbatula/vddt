@@ -1,0 +1,76 @@
+<%- include('../partials/header') %>
+
+<section class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i data-feather="users"></i> Users (<%= users.length %>)</h3>
+    <a href="/users/new" class="btn btn-primary btn-sm">
+      <i data-feather="plus"></i> Add User
+    </a>
+  </div>
+
+  <% if (flashSuccess && flashSuccess.length) { %>
+    <div class="alert alert--success" style="margin:16px 20px 0">
+      <i data-feather="check-circle"></i> <%= flashSuccess[0] %>
+    </div>
+  <% } %>
+  <% if (flashError && flashError.length) { %>
+    <div class="alert alert--danger" style="margin:16px 20px 0">
+      <i data-feather="alert-circle"></i> <%= flashError[0] %>
+    </div>
+  <% } %>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Full Name</th>
+          <th>Username</th>
+          <th class="text-center">Role</th>
+          <th class="text-center">Status</th>
+          <th>Created</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(u => { %>
+          <tr>
+            <td class="text-muted text-sm"><%= u.id %></td>
+            <td class="font-medium"><%= u.full_name %></td>
+            <td class="text-sm"><%= u.username %></td>
+            <td class="text-center">
+              <span class="badge badge--<%= u.role %>"><%= u.role %></span>
+            </td>
+            <td class="text-center">
+              <span class="badge <%= u.is_active ? 'badge--matched' : 'badge--discrepancy' %>">
+                <%= u.is_active ? 'Active' : 'Inactive' %>
+              </span>
+            </td>
+            <td class="text-sm text-muted">
+              <%= new Date(u.created_at).toLocaleDateString('en-PH') %>
+            </td>
+            <td class="text-center">
+              <div class="btn-group">
+                <a href="/users/<%= u.id %>/edit" class="btn btn-icon" title="Edit">
+                  <i data-feather="edit-2"></i>
+                </a>
+                <% if (currentUser.id !== u.id) { %>
+                  <form action="/users/<%= u.id %>?_method=DELETE" method="POST" style="display:inline"
+                        onsubmit="return confirm('Delete user <%= u.username %>?')">
+                    <button type="submit" class="btn btn-icon btn-icon--danger" title="Delete">
+                      <i data-feather="trash-2"></i>
+                    </button>
+                  </form>
+                <% } else { %>
+                  <span class="text-muted text-sm" style="padding:6px">(you)</span>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

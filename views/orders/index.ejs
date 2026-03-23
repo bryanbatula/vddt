@@ -1,0 +1,113 @@
+<%- include('../partials/header') %>
+
+<!-- Filters -->
+<section class="card mb-4">
+  <div class="card-header">
+    <h3 class="card-title"><i data-feather="filter"></i> Filter Orders</h3>
+    <a href="/orders" class="btn btn-outline btn-sm">Clear</a>
+  </div>
+  <div class="card-body">
+    <form method="GET" action="/orders" class="filter-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-control">
+            <option value="">All Statuses</option>
+            <% ['Pending','Partially Received','Fully Received','Cancelled'].forEach(s => { %>
+              <option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= s %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vendor</label>
+          <select name="vendor_id" class="form-control">
+            <option value="">All Vendors</option>
+            <% vendors.forEach(v => { %>
+              <option value="<%= v.id %>" <%= filters.vendor_id == v.id ? 'selected' : '' %>><%= v.name %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group form-group--action">
+          <button type="submit" class="btn btn-primary">Apply</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- Table -->
+<section class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i data-feather="file-text"></i> Purchase Orders (<%= orders.length %>)</h3>
+    <a href="/orders/new" class="btn btn-primary btn-sm">
+      <i data-feather="plus"></i> New PO
+    </a>
+  </div>
+
+  <% if (orders.length === 0) { %>
+    <div class="empty-state">
+      <i data-feather="file-text"></i>
+      <p>No purchase orders found.</p>
+      <a href="/orders/new" class="btn btn-primary">Create First PO</a>
+    </div>
+  <% } else { %>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>PO Number</th>
+          <th>Vendor</th>
+          <th>Order Date</th>
+          <th>Expected Delivery</th>
+          <th class="text-center">Lines</th>
+          <th class="text-center">Discrepancies</th>
+          <th class="text-center">Status</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% orders.forEach(o => { %>
+          <tr class="<%= parseInt(o.discrepancy_count) > 0 ? 'row-discrepancy' : '' %>">
+            <td class="font-medium">
+              <a href="/orders/<%= o.id %>" class="link-primary"><%= o.po_number %></a>
+            </td>
+            <td><%= o.vendor_name %></td>
+            <td class="text-sm"><%= new Date(o.order_date).toLocaleDateString('en-PH') %></td>
+            <td class="text-sm">
+              <%= o.expected_delivery_date ? new Date(o.expected_delivery_date).toLocaleDateString('en-PH') : '—' %>
+            </td>
+            <td class="text-center"><%= o.delivery_lines %></td>
+            <td class="text-center">
+              <% if (parseInt(o.discrepancy_count) > 0) { %>
+                <span class="badge badge--discrepancy"><%= o.discrepancy_count %></span>
+              <% } else { %>
+                <span class="text-muted">0</span>
+              <% } %>
+            </td>
+            <td class="text-center">
+              <span class="badge badge--<%= o.status.toLowerCase().replace(/[\s]/g,'') %>">
+                <%= o.status %>
+              </span>
+            </td>
+            <td class="text-center">
+              <div class="btn-group">
+                <a href="/orders/<%= o.id %>" class="btn btn-icon" title="View"><i data-feather="eye"></i></a>
+                <a href="/deliveries/new?po_id=<%= o.id %>" class="btn btn-icon" title="Record Delivery"><i data-feather="package"></i></a>
+                <a href="/orders/<%= o.id %>/edit" class="btn btn-icon" title="Edit"><i data-feather="edit-2"></i></a>
+                <form action="/orders/<%= o.id %>?_method=DELETE" method="POST" style="display:inline"
+                      onsubmit="return confirm('Delete PO <%= o.po_number %>?')">
+                  <button type="submit" class="btn btn-icon btn-icon--danger" title="Delete">
+                    <i data-feather="trash-2"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,141 @@
+<%- include('../partials/header') %>
+
+<nav class="breadcrumb">
+  <a href="/">Dashboard</a>
+  <i data-feather="chevron-right"></i>
+  <a href="/orders">Purchase Orders</a>
+  <i data-feather="chevron-right"></i>
+  <span><%= order.po_number %></span>
+</nav>
+
+<div class="detail-header">
+  <div>
+    <h2 class="detail-title"><%= order.po_number %></h2>
+    <p class="detail-sub">
+      Vendor: <a href="/vendors/<%= order.vendor_id %>" class="link-subtle"><strong><%= order.vendor_name %></strong></a>
+      &nbsp;·&nbsp;
+      <span class="badge badge--<%= order.status.toLowerCase().replace(/[\s]/g,'') %>"><%= order.status %></span>
+    </p>
+  </div>
+  <div class="detail-actions">
+    <a href="/deliveries/new?po_id=<%= order.id %>" class="btn btn-primary">
+      <i data-feather="package"></i> Record Delivery
+    </a>
+    <a href="/orders/<%= order.id %>/edit" class="btn btn-outline">
+      <i data-feather="edit-2"></i> Edit
+    </a>
+    <form action="/orders/<%= order.id %>?_method=DELETE" method="POST" style="display:inline"
+          onsubmit="return confirm('Delete this PO and all its deliveries?')">
+      <button type="submit" class="btn btn-danger">
+        <i data-feather="trash-2"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- PO Info Cards -->
+<div class="detail-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); margin-bottom:1.5rem">
+  <div class="stat-card stat-card--primary" style="margin:0">
+    <div class="stat-icon"><i data-feather="calendar"></i></div>
+    <div class="stat-body">
+      <p class="stat-label">Order Date</p>
+      <h2 class="stat-value" style="font-size:1.1rem"><%= new Date(order.order_date).toLocaleDateString('en-PH') %></h2>
+    </div>
+  </div>
+  <div class="stat-card stat-card--info" style="margin:0">
+    <div class="stat-icon"><i data-feather="truck"></i></div>
+    <div class="stat-body">
+      <p class="stat-label">Expected Delivery</p>
+      <h2 class="stat-value" style="font-size:1.1rem">
+        <%= order.expected_delivery_date ? new Date(order.expected_delivery_date).toLocaleDateString('en-PH') : 'Not set' %>
+      </h2>
+    </div>
+  </div>
+  <div class="stat-card stat-card--<%= deliveries.filter(d=>d.status==='Discrepancy'||d.status==='Damaged').length > 0 ? 'danger' : 'success' %>" style="margin:0">
+    <div class="stat-icon"><i data-feather="alert-triangle"></i></div>
+    <div class="stat-body">
+      <p class="stat-label">Discrepancies</p>
+      <h2 class="stat-value"><%= deliveries.filter(d=>d.status==='Discrepancy'||d.status==='Damaged').length %></h2>
+    </div>
+  </div>
+</div>
+
+<!-- Deliveries Table -->
+<section class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i data-feather="package"></i> Delivery Lines (<%= deliveries.length %>)</h3>
+    <a href="/deliveries/new?po_id=<%= order.id %>" class="btn btn-primary btn-sm">
+      <i data-feather="plus"></i> Add Line
+    </a>
+  </div>
+
+  <% if (deliveries.length === 0) { %>
+    <div class="empty-state">
+      <i data-feather="package"></i>
+      <p>No delivery lines recorded for this PO yet.</p>
+      <a href="/deliveries/new?po_id=<%= order.id %>" class="btn btn-primary">Record First Delivery</a>
+    </div>
+  <% } else { %>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>SKU</th>
+          <th class="text-center">Expected</th>
+          <th class="text-center">Actual</th>
+          <th class="text-center">Damaged</th>
+          <th class="text-center">Variance</th>
+          <th class="text-center">Shrinkage %</th>
+          <th class="text-center">Status</th>
+          <th>Received By</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% deliveries.forEach(d => { %>
+          <tr class="
+            <%= d.status === 'Discrepancy'   ? 'row-discrepancy' : '' %>
+            <%= d.status === 'Damaged'       ? 'row-damaged'     : '' %>
+            <%= d.status === 'Over-Delivery' ? 'row-over'        : '' %>
+          ">
+            <td class="font-medium"><%= d.product_name %></td>
+            <td class="text-sm text-muted"><%= d.sku || '—' %></td>
+            <td class="text-center"><%= d.expected_quantity %></td>
+            <td class="text-center"><%= d.actual_quantity %></td>
+            <td class="text-center <%= d.damaged_quantity > 0 ? 'text-danger' : '' %>"><%= d.damaged_quantity %></td>
+            <td class="text-center <%= d.quantity_variance < 0 ? 'text-danger' : d.quantity_variance > 0 ? 'text-over' : '' %>">
+              <%= d.quantity_variance > 0 ? '+' : '' %><%= d.quantity_variance %>
+            </td>
+            <td class="text-center <%= parseFloat(d.shrinkage_percentage) > 0 ? 'text-danger' : '' %>">
+              <%= parseFloat(d.shrinkage_percentage).toFixed(2) %>%
+            </td>
+            <td class="text-center">
+              <span class="badge badge--<%= d.status.toLowerCase().replace(/[\s-]/g,'') %>"><%= d.status %></span>
+            </td>
+            <td class="text-sm"><%= d.received_by || '—' %></td>
+            <td class="text-center">
+              <div class="btn-group">
+                <a href="/deliveries/<%= d.id %>" class="btn btn-icon" title="View"><i data-feather="eye"></i></a>
+                <a href="/deliveries/<%= d.id %>/edit" class="btn btn-icon" title="Edit"><i data-feather="edit-2"></i></a>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+      <tfoot>
+        <tr class="table-totals">
+          <td colspan="2"><strong>Totals</strong></td>
+          <td class="text-center"><strong><%= deliveries.reduce((s,d)=>s+d.expected_quantity,0) %></strong></td>
+          <td class="text-center"><strong><%= deliveries.reduce((s,d)=>s+d.actual_quantity,0) %></strong></td>
+          <td class="text-center text-danger"><strong><%= deliveries.reduce((s,d)=>s+d.damaged_quantity,0) %></strong></td>
+          <td class="text-center"><strong><%= deliveries.reduce((s,d)=>s+parseInt(d.quantity_variance),0) %></strong></td>
+          <td class="text-center" colspan="4"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,31 @@
+# ============================================================
+# Render.com Deploy Configuration
+# Free tier: Node.js web service
+# Database: Supabase (external – set DATABASE_URL manually)
+# ============================================================
+
+services:
+  - type: web
+    name: vddt-robinsons
+    env: node
+    plan: free
+    region: singapore   # closest to Philippines
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: PORT
+        value: 10000
+
+      # ── Set these manually in Render dashboard ──────────
+      # DATABASE_URL  → from Supabase: Settings > Database > URI
+      # SESSION_SECRET → any long random string (min 32 chars)
+      - key: DATABASE_URL
+        sync: false
+
+      - key: SESSION_SECRET
+        generateValue: true   # Render auto-generates a secure random value

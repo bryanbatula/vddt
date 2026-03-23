@@ -1,0 +1,22 @@
+      </main><!-- /.content-area -->
+    </div><!-- /.main-wrapper -->
+  </div><!-- /.app-layout -->
+
+  <script src="/js/main.js"></script>
+  <script>
+    feather.replace();
+    // Live clock in topbar
+    const el = document.getElementById('topbarDate');
+    if (el) {
+      const tick = () => {
+        const now = new Date();
+        el.textContent = now.toLocaleDateString('en-PH', {
+          weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+        }) + ' · ' + now.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' });
+      };
+      tick();
+      setInterval(tick, 1000);
+    }
+  </script>
+</body>
+</html>

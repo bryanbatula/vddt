@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | VDDT – Robinsons Supermarket</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <%- include('sidebar') %>
+    <div class="main-wrapper">
+      <header class="topbar">
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <i data-feather="menu"></i>
+        </button>
+        <div class="topbar-title">
+          <h1 class="page-title"><%= title %></h1>
+        </div>
+        <div class="topbar-right">
+          <span class="topbar-date" id="topbarDate"></span>
+          <% if (currentUser) { %>
+          <div class="avatar-chip">
+            <span class="avatar-chip-initial"><%= currentUser.full_name.charAt(0).toUpperCase() %></span>
+            <div class="avatar-chip-info">
+              <span class="avatar-chip-name"><%= currentUser.full_name %></span>
+              <span class="avatar-chip-role"><%= currentUser.role %></span>
+            </div>
+            <a href="/auth/logout" class="avatar-logout" title="Sign out">
+              <i data-feather="log-out"></i>
+            </a>
+          </div>
+          <% } %>
+        </div>
+      </header>
+
+      <!-- Flash Messages -->
+      <% if (flashSuccess && flashSuccess.length) { %>
+        <div class="flash flash--success">
+          <i data-feather="check-circle"></i>
+          <span><%= flashSuccess[0] %></span>
+          <button class="flash-close" onclick="this.parentElement.remove()"><i data-feather="x"></i></button>
+        </div>
+      <% } %>
+      <% if (flashError && flashError.length) { %>
+        <div class="flash flash--danger">
+          <i data-feather="alert-circle"></i>
+          <span><%= flashError[0] %></span>
+          <button class="flash-close" onclick="this.parentElement.remove()"><i data-feather="x"></i></button>
+        </div>
+      <% } %>
+
+      <main class="content-area">

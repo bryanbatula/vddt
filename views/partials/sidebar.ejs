@@ -1,0 +1,108 @@
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <span class="brand-icon">B</span>
+    </div>
+    <div class="brand-text">
+      <span class="brand-name">Bryan's</span>
+      <span class="brand-sub">Delivery Tracker</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <!-- Main – manager & admin only -->
+    <% if (currentUser && (currentUser.role === 'manager' || currentUser.role === 'admin')) { %>
+    <div class="nav-section-label">Main</div>
+    <ul class="nav-list">
+      <li class="nav-item <%= currentPath === '/' ? 'active' : '' %>">
+        <a href="/" class="nav-link">
+          <i data-feather="grid"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+    </ul>
+    <% } %>
+
+    <!-- Operations – all roles -->
+    <div class="nav-section-label">Operations</div>
+    <ul class="nav-list">
+      <li class="nav-item <%= currentPath.startsWith('/deliveries') ? 'active' : '' %>">
+        <a href="/deliveries" class="nav-link">
+          <i data-feather="package"></i>
+          <span>Deliveries</span>
+        </a>
+      </li>
+      <% if (currentUser && (currentUser.role === 'manager' || currentUser.role === 'admin')) { %>
+      <li class="nav-item <%= currentPath.startsWith('/orders') ? 'active' : '' %>">
+        <a href="/orders" class="nav-link">
+          <i data-feather="file-text"></i>
+          <span>Purchase Orders</span>
+        </a>
+      </li>
+      <% } %>
+      <% if (currentUser && currentUser.role === 'admin') { %>
+      <li class="nav-item <%= currentPath.startsWith('/vendors') ? 'active' : '' %>">
+        <a href="/vendors" class="nav-link">
+          <i data-feather="truck"></i>
+          <span>Vendors</span>
+        </a>
+      </li>
+      <% } %>
+    </ul>
+
+    <!-- Quick Actions -->
+    <div class="nav-section-label">Quick Actions</div>
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a href="/deliveries/new" class="nav-link nav-link-action">
+          <i data-feather="plus-circle"></i>
+          <span>Record Delivery</span>
+        </a>
+      </li>
+      <% if (currentUser && (currentUser.role === 'manager' || currentUser.role === 'admin')) { %>
+      <li class="nav-item">
+        <a href="/orders/new" class="nav-link nav-link-action">
+          <i data-feather="clipboard"></i>
+          <span>New Purchase Order</span>
+        </a>
+      </li>
+      <% } %>
+    </ul>
+
+    <!-- Admin -->
+    <% if (currentUser && currentUser.role === 'admin') { %>
+    <div class="nav-section-label">Admin</div>
+    <ul class="nav-list">
+      <li class="nav-item <%= currentPath.startsWith('/users') ? 'active' : '' %>">
+        <a href="/users" class="nav-link">
+          <i data-feather="users"></i>
+          <span>User Management</span>
+        </a>
+      </li>
+    </ul>
+    <% } %>
+  </nav>
+
+  <!-- User Info + Logout -->
+  <% if (currentUser) { %>
+  <div class="sidebar-user">
+    <div class="sidebar-user-info">
+      <div class="sidebar-avatar">
+        <%= currentUser.full_name.charAt(0).toUpperCase() %>
+      </div>
+      <div class="sidebar-user-text">
+        <span class="sidebar-user-name"><%= currentUser.full_name %></span>
+        <span class="sidebar-user-role"><%= currentUser.role %></span>
+      </div>
+    </div>
+    <a href="/auth/logout" class="sidebar-logout" title="Sign out">
+      <i data-feather="log-out"></i>
+    </a>
+  </div>
+  <% } %>
+
+  <div class="sidebar-footer">
+    <span>&copy; <%= currentYear %> Bryan's Supermarket</span>
+  </div>
+</aside>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
