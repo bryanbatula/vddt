@@ -36,13 +36,20 @@ app.use((req, res, next) => {
 });
 
 // ── PostgreSQL-backed Session Store ───────────────────────
+const pgStore = new PgSession({
+  pool,
+  tableName:            'user_sessions',
+  createTableIfMissing: true,
+  pruneSessionInterval: 60 * 60,
+});
+
+// Prevent session store DB errors from crashing requests
+pgStore.on('error', (err) => {
+  console.error('Session store error (non-fatal):', err.message);
+});
+
 app.use(session({
-  store: new PgSession({
-    pool,
-    tableName:            'user_sessions',
-    createTableIfMissing: true,
-    pruneSessionInterval: 60 * 60,
-  }),
+  store: pgStore,
   secret:            process.env.SESSION_SECRET || 'vddt-local-dev-secret-change-in-prod',
   resave:            false,
   saveUninitialized: false,
