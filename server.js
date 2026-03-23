@@ -25,39 +25,46 @@ app.use(express.json());
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ── Default locals (set BEFORE session so error handler always has them) ──
+app.use((req, res, next) => {
+  res.locals.currentPath  = req.path;
+  res.locals.currentYear  = new Date().getFullYear();
+  res.locals.currentUser  = null;
+  res.locals.flashSuccess = [];
+  res.locals.flashError   = [];
+  next();
+});
+
 // ── PostgreSQL-backed Session Store ───────────────────────
-// Sessions survive server restarts and Render's free-tier sleep/wake cycles.
 app.use(session({
   store: new PgSession({
     pool,
     tableName:            'user_sessions',
-    createTableIfMissing: true,   // auto-creates the table on first run
-    pruneSessionInterval: 60 * 60, // clean up expired sessions every hour
+    createTableIfMissing: true,
+    pruneSessionInterval: 60 * 60,
   }),
   secret:            process.env.SESSION_SECRET || 'vddt-local-dev-secret-change-in-prod',
   resave:            false,
   saveUninitialized: false,
   cookie: {
-    secure:   process.env.NODE_ENV === 'production', // HTTPS only in prod
+    secure:   process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge:   8 * 60 * 60 * 1000, // 8-hour sessions
+    maxAge:   8 * 60 * 60 * 1000,
   },
 }));
 
 // ── Flash Messages ─────────────────────────────────────────
 app.use(flash());
 
-// ── Global View Locals ─────────────────────────────────────
+// ── Overwrite locals with real session values (after session is ready) ──
 app.use((req, res, next) => {
-  res.locals.currentPath  = req.path;
-  res.locals.currentYear  = new Date().getFullYear();
-  res.locals.currentUser  = req.session.user || null;
+  res.locals.currentUser  = req.session.user  || null;
   res.locals.flashSuccess = req.flash('success');
   res.locals.flashError   = req.flash('error');
   next();
 });
 
-// ── Health Check (used by UptimeRobot to keep app awake) ──
+// ── Health Check ───────────────────────────────────────────
 app.get('/health', (req, res) => {
   res.status(200).json({
     status:    'ok',
@@ -86,12 +93,30 @@ app.use((req, res) => {
 
 // ── Global Error Handler ───────────────────────────────────
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).render('error', {
-    title:   '500 – Server Error',
-    message: err.message || 'An unexpected error occurred.',
-    code:    500,
-  });
+  console.error('UNHANDLED ERROR:', err.stack || err.message);
+
+  // Guarantee locals are always set so the error template never crashes
+  res.locals.currentUser  = res.locals.currentUser  || null;
+  res.locals.currentPath  = res.locals.currentPath  || '/';
+  res.locals.currentYear  = res.locals.currentYear  || new Date().getFullYear();
+  res.locals.flashSuccess = res.locals.flashSuccess || [];
+  res.locals.flashError   = res.locals.flashError   || [];
+
+  try {
+    res.status(500).render('error', {
+      title:   '500 – Server Error',
+      message: err.message || 'An unexpected error occurred.',
+      code:    500,
+    });
+  } catch (renderErr) {
+    // Last resort — plain HTML if even the error template fails
+    console.error('Error template also failed:', renderErr.message);
+    res.status(500).send(`
+      <h1 style="font-family:sans-serif;color:#dc2626">500 – Server Error</h1>
+      <p style="font-family:sans-serif">${err.message || 'An unexpected error occurred.'}</p>
+      <a href="/auth/login" style="font-family:sans-serif">Go to Login</a>
+    `);
+  }
 });
 
 // ── Start Server ───────────────────────────────────────────
